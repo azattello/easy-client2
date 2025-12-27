@@ -41,7 +41,11 @@ const Parcels2 = () => {
 
         // Получаем все статусы через getStatus
         const statusesData = await getStatus();
-        setStatuses(statusesData || []);
+        const cleanStatuses = (statusesData || []).filter(
+          s => s && typeof s.statusText === 'string'
+        );
+
+        setStatuses(cleanStatuses);
 
         setLoading(false);
       } catch (error) {
@@ -94,11 +98,11 @@ const Parcels2 = () => {
   
   
   // Сортируем статусы так, чтобы "Получено" всегда было последним
-  const sortedStatuses = [...statuses].sort((a, b) => {
-    if (a.statusText === 'Получено') return 1;
-    if (b.statusText === 'Получено') return -1;
-    return 0;
-  });
+  const sortedStatuses = [...statuses].sort((a, b) =>
+    a.statusText === 'Получено' ? 1 :
+    b.statusText === 'Получено' ? -1 : 0
+  );
+
 
   return (
     <div className="container">
@@ -166,8 +170,9 @@ const Parcels2 = () => {
                   {sortedStatuses.map((status, index) => {
                     // Проверяем, есть ли статус в истории закладки
                     const historyItem = bookmark.history?.find(
-                      (item) => item.status.statusText === status.statusText
+                      item => item?.status?.statusText === status.statusText
                     );
+
 
                     return (
                       <div className="status-item" key={index}>
